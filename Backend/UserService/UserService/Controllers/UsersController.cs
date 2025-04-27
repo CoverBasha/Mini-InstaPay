@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using UserService.Database;
 using UserService.Models;
 
 namespace UserService.Controllers
@@ -16,13 +17,19 @@ namespace UserService.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(LoginRequest loginRequest)
+        public async Task<IActionResult> Register(RegisterRequest loginRequest)
         {
             var result = await _userService.RegisterAsync(loginRequest);
 
-            return !result.Succes ? BadRequest() : Ok();
+            return !result.Succes ? BadRequest(result.Message) : Ok(result.Message);
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginRequest loginRequest)
+        {
+            var result = await _userService.LoginAsync(loginRequest);
 
+            return !result.Succes ? BadRequest(result.Message) : Ok(result.Message);
+        }
     }
 }

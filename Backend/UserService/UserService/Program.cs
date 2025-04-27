@@ -1,6 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using UserService.Database;
 using UserService.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddDbContext<InstaDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
+
 
 // Add services to the container.
 

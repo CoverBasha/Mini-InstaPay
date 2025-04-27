@@ -11,14 +11,9 @@ namespace UserService.Database
         public DbSet<BalanceLog>? BalanceLogs { get; set; }
         public DbSet<Notification>? Notifications { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public InstaDbContext(DbContextOptions<InstaDbContext> options) : base(options)
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json")
-            .Build();
 
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("Default"));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

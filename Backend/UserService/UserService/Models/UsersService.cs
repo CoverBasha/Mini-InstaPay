@@ -1,24 +1,71 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UserService.Database;
 
 namespace UserService.Models
 {
     public class UsersService
     {
-        public async Task<AuthenticationResult> RegisterAsync(LoginRequest request)
+        private readonly InstaDbContext context;
+
+        public UsersService(InstaDbContext context)
         {
-            if (request.UserName == request.Password)
+            this.context = context;
+        }
+        
+        public async Task<AuthenticationResult> RegisterAsync(RegisterRequest request)
+        {         
+
+            var found = context.Users.SingleOrDefault(u=>u.UserName == request.Username);
+
+            if (found != null)
                 return new AuthenticationResult
                 {
                     Succes = false,
-                    Message = "Shala7ha"
+                    Message = "User with same name exists"
+                };
+
+            User user = new User
+            {
+                UserName = request.Username,
+                Password = request.Password,
+                PhoneNum = request.PhoneNumber,
+                Balance = 0
+            };
+
+            context.Users.Add(user);
+            context.SaveChanges();
+
+            return new AuthenticationResult
+            {
+                Succes = true,
+                Message = "User created sccessfully"
+            };
+                
+        }
+
+        public async Task<AuthenticationResult> LoginAsync(LoginRequest request)
+        {
+            var found = context.Users.SingleOrDefault(u => u.UserName.ToLower() == request.Username.ToLower());
+
+            if (found == null)
+                return new AuthenticationResult
+                {
+                    Succes = false,
+                    Message = "User doesn't exist"
+                };
+
+            if (found.Password != request.Password)
+                return new AuthenticationResult
+                {
+                    Succes = false,
+                    Message = "Password mismatch"
                 };
 
             return new AuthenticationResult
             {
                 Succes = true,
-                Message = "a7a"
+                Message = "Logged in successfully"
             };
-                
         }
 
     }
