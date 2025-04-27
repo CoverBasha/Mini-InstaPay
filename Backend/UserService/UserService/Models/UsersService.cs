@@ -12,8 +12,15 @@ namespace UserService.Models
             this.context = context;
         }
         
-        public async Task<AuthenticationResult> RegisterAsync(RegisterRequest request)
-        {         
+        public async Task<AuthenticationResult> RegisterAsync(RegisterRequest request, ISession session)
+        {
+            int? loggeduser = session.GetInt32("UserId");
+            if (loggeduser != null && loggeduser > 0)
+                return new AuthenticationResult
+                {
+                    Succes = false,
+                    Message = "You are already logged in!"
+                };
 
             var found = context.Users.SingleOrDefault(u=>u.UserName == request.Username);
 
@@ -35,6 +42,8 @@ namespace UserService.Models
             context.Users.Add(user);
             context.SaveChanges();
 
+            session.SetInt32("UserId", user.UserID);
+
             return new AuthenticationResult
             {
                 Succes = true,
@@ -43,8 +52,16 @@ namespace UserService.Models
                 
         }
 
-        public async Task<AuthenticationResult> LoginAsync(LoginRequest request)
+        public async Task<AuthenticationResult> LoginAsync(LoginRequest request, ISession session)
         {
+            int? loggeduser = session.GetInt32("UserId");
+            if (loggeduser != null && loggeduser > 0)
+                return new AuthenticationResult
+                {
+                    Succes = false,
+                    Message = "You are already logged in!"
+                };
+
             var found = context.Users.SingleOrDefault(u => u.UserName.ToLower() == request.Username.ToLower());
 
             if (found == null)
@@ -60,6 +77,8 @@ namespace UserService.Models
                     Succes = false,
                     Message = "Password mismatch"
                 };
+
+            session.SetInt32("UserId", found.UserID);
 
             return new AuthenticationResult
             {
