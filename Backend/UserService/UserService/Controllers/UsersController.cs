@@ -17,9 +17,9 @@ namespace UserService.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest loginRequest)
+        public async Task<IActionResult> Register(RegisterRequest registerRequest)
         {
-            var result = await _userService.RegisterAsync(loginRequest);
+            var result = await _userService.RegisterAsync(registerRequest, HttpContext.Session);
 
             return !result.Succes ? BadRequest(result.Message) : Ok(result.Message);
         }
@@ -27,7 +27,7 @@ namespace UserService.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
-            var result = await _userService.LoginAsync(loginRequest);
+            var result = await _userService.LoginAsync(loginRequest, HttpContext.Session);
 
             return !result.Succes ? BadRequest(result.Message) : Ok(result.Message);
         }

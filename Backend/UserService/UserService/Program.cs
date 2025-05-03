@@ -18,6 +18,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UsersService>();
 
+// Set memory cache distribution
+builder.Services.AddDistributedMemoryCache();
+
+// Add sessions
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+builder.Services.AddSession(options =>
+            options.IdleTimeout = TimeSpan.FromHours(24));
 
 var app = builder.Build();
 
@@ -31,6 +39,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllers();
 
