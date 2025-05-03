@@ -68,5 +68,54 @@ namespace UserService.Models
             };
         }
 
+        public async Task<AuthenticationResult> ChargeBalance(int amount, int userId)
+        {
+            var user = context.Users.SingleOrDefault(u => u.UserID == userId);
+
+            if (user == null)
+                return new AuthenticationResult
+                {
+                    Succes= false,
+                    Message = "User Doesn't exist"
+                };
+
+            user.Balance += amount;
+            context.SaveChanges();
+
+            return new AuthenticationResult
+            {
+                Succes = true,
+                Message = $"Added {amount}"
+            };
+        }
+
+        public async Task<AuthenticationResult> Withdraw(int amount, int userId)
+        {
+            var user = context.Users.SingleOrDefault(u => u.UserID == userId);
+
+            if (user == null)
+                return new AuthenticationResult
+                {
+                    Succes = false,
+                    Message = "User Doesn't exist"
+                };
+
+            if (user.Balance < amount)
+                return new AuthenticationResult
+                {
+                    Succes = false,
+                    Message = "Balance insufficient"
+                };
+            
+            user.Balance -= amount;
+            context.SaveChanges();
+
+            return new AuthenticationResult
+            {
+                Succes = true,
+                Message = $"Withdrew {amount}"
+            };
+        }
+
     }
 }
