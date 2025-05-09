@@ -10,48 +10,72 @@ import { useToast } from '@/components/ui/use-toast';
 
 const Signup = () => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
         description: "Please make sure your passwords match.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
+  
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // In a real app, this would register a new user
+  
+    try {
+      // Simulate API call
+      const response = await fetch('https://localhost:8000/api/Users/register', {
+        method: 'POST', // Use POST to send data
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          UserName: name,
+          phoneNumber: phone,
+          Password: password,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to create account');
+      }
+  
+      const data = await response.json();
+  
+      // Mock user creation
       const mockUser = {
-        id: '123',
+        id: data.id || '123',
         name: name,
-        email: email,
-        balance: 1000.00 // Starting balance
+        phone: phone,
+        balance: 1000.0, // Starting balance
       };
-      
+  
       localStorage.setItem('instaPay_user', JSON.stringify(mockUser));
-      
+  
       toast({
         title: "Account created!",
         description: "Welcome to Mini-InstaPay. Your account is ready to use.",
       });
-      
+  
       navigate('/dashboard');
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -86,13 +110,13 @@ const Signup = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="phone-number">Phone Number</Label>
                 <Input 
-                  id="email"
-                  type="email" 
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="phone-number"
+                  type="text" 
+                  placeholder="01XXXXXXXXX"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                 />
               </div>
