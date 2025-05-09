@@ -16,7 +16,7 @@ namespace Transaction_Service.Models
         {
             var sender = context.Users.SingleOrDefault(u => u.UserID == userId);
 
-            
+
             if (sender == null)
                 return new TransactionResult
                 {
@@ -34,18 +34,17 @@ namespace Transaction_Service.Models
 
         public TransactionResult MakeTransaction(TransactionRequest request)
         {
-            var reciever = context.Users.SingleOrDefault(u =>u.UserID == request.RecieverId);
-            var sender = context.Users.SingleOrDefault(u => u.UserID == request.SenderId);
-
-            if (reciever == null || sender == null)
+            var reciever = context.Users.SingleOrDefault(u => u.UserID == request.RecieverId);
+            if (reciever == null)
                 return new TransactionResult { Success = false, Message = "User not found" };
 
-            if (sender.Balance < request.Amount)
-                return new TransactionResult() { Success = false, Message = "Insufficient balance" };
-
+            var sender = context.Users.SingleOrDefault(u => u.UserID == request.SenderId);
+            if (sender == null)
+                return new TransactionResult { Success = false, Message = "User not found" };
             if (request.SenderId == request.RecieverId)
                 return new TransactionResult { Success = false, Message = "Cannot send money to yourself" };
-
+            if (sender.Balance < request.Amount)
+                return new TransactionResult() { Success = false, Message = "Insufficient balance" };
 
             sender.Balance -= request.Amount;
 
@@ -64,11 +63,17 @@ namespace Transaction_Service.Models
             context.Transactions.Add(transaction);
             context.SaveChanges();
 
-            
+            var notification = new Notification
+            {
+                User = reciever,
+                UserID = reciever.UserID,
+                Message = $"recieved {transaction.Amount} from {sender.UserName}, transaction id: {transaction.TID}",
+                Time = DateTime.UtcNow
+            };
 
             return new TransactionResult
             {
-                Result = new Transaction[] {transaction} ,
+                Result = new Transaction[] { transaction },
                 Success = true,
                 Message = "Done"
             };
