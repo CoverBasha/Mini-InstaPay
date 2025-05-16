@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -34,43 +33,34 @@ const Signup = () => {
     try {
       // Simulate API call
       const response = await fetch('https://localhost:8000/api/Users/register', {
-        method: 'POST', // Use POST to send data
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          UserName: name,
-          phoneNumber: phone,
-          Password: password,
+          username: name,
+          password: password,
+          phoneNumber: phone
         }),
       });
-  
-      if (!response.ok) {
-        throw new Error('Failed to create account');
-      }
-  
+      
       const data = await response.json();
-  
-      // Mock user creation
-      const mockUser = {
-        id: data.id || '123',
-        name: name,
-        phone: phone,
-        balance: 1000.0, // Starting balance
-      };
-  
-      localStorage.setItem('instaPay_user', JSON.stringify(mockUser));
-  
+
+      if (!response.ok || data.error) {
+        throw new Error(data.message || 'Failed to create account');
+      }
+
       toast({
         title: "Account created!",
-        description: "Welcome to Mini-InstaPay. Your account is ready to use.",
+        description: "Please log in with your new account.",
       });
-  
-      navigate('/dashboard');
+
+      navigate('/login');
     } catch (error) {
+      console.error('Signup error:', error);
       toast({
         title: "Error",
-        description: "Failed to create account. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create account. Please try again.",
         variant: "destructive",
       });
     } finally {

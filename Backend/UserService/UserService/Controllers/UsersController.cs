@@ -32,6 +32,7 @@ namespace UserService.Controllers
             return !result.Succes ? BadRequest(result.Message) : Ok(result.Message);
         }
 
+        [HttpPost("charge")]
         public async Task<IActionResult> ChargeBalance(int amount, int userId)
         {
             var result = await _userService.ChargeBalance(amount, userId);
@@ -39,6 +40,7 @@ namespace UserService.Controllers
             return !result.Succes ? NotFound(result.Message) : Ok(result.Message);
         }
 
+        [HttpPost("withdraw")]
         public async Task<IActionResult> Withdraw(int amount, int userId)
         {
             var result = await _userService.Withdraw(amount, userId);

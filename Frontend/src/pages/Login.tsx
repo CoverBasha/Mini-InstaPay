@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,30 +8,45 @@ import { Send } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch('https://localhost:8000/api/Users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        }),
+      });
+
+      const data = await response;
+      console.log(data);
+
+      if (!data.ok) {
+        throw new Error('Login failed');
+      }
       
-      // For demo purposes, accept any login
-      // In a real app, validate credentials with backend
-      const mockUser = {
-        id: '123',
-        name: 'John Doe',
-        email: email,
-        balance: 2580.75
+
+      // Store user data
+      const user = {
+        id: data.id || '123',
+        name: username,
+        username: username,
+        balance: data.balance || 0
       };
       
-      localStorage.setItem('instaPay_user', JSON.stringify(mockUser));
+      localStorage.setItem('instaPay_user', JSON.stringify(user));
       
       toast({
         title: "Login successful!",
@@ -40,7 +54,16 @@ const Login = () => {
       });
       
       navigate('/dashboard');
-    }, 1000);
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,13 +87,13 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input 
-                  id="email"
-                  type="email" 
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  type="text" 
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               </div>
