@@ -15,4 +15,4 @@ EXPOSE 5204
 
 ENV ASPNETCORE_URLS=http://+:5204
 
-ENTRYPOINT ["dotnet", "Transaction Service.dll"]
+ENTRYPOINT ["dotnet", "NotificationService.dll"]
