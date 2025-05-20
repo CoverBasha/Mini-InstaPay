@@ -3,17 +3,19 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using UserService.Database;
+using Transaction_Service.Database;
 
 #nullable disable
 
-namespace UserService.Migrations
+namespace Transaction_Service.Migrations
 {
     [DbContext(typeof(InstaDbContext))]
-    partial class InstaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520142521_AddedIDToNotifications")]
+    partial class AddedIDToNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +24,7 @@ namespace UserService.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("UserService.Models.BalanceLog", b =>
+            modelBuilder.Entity("Transaction_Service.Models.BalanceLog", b =>
                 {
                     b.Property<double>("BalanceAfter")
                         .HasColumnType("float");
@@ -44,7 +46,7 @@ namespace UserService.Migrations
                     b.ToTable("BalanceLogs");
                 });
 
-            modelBuilder.Entity("UserService.Models.Notification", b =>
+            modelBuilder.Entity("Transaction_Service.Models.Notification", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -70,7 +72,7 @@ namespace UserService.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("UserService.Models.Transaction", b =>
+            modelBuilder.Entity("Transaction_Service.Models.Transaction", b =>
                 {
                     b.Property<int>("TID")
                         .ValueGeneratedOnAdd()
@@ -102,7 +104,7 @@ namespace UserService.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("UserService.Models.User", b =>
+            modelBuilder.Entity("Transaction_Service.Models.User", b =>
                 {
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
@@ -133,9 +135,9 @@ namespace UserService.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("UserService.Models.BalanceLog", b =>
+            modelBuilder.Entity("Transaction_Service.Models.BalanceLog", b =>
                 {
-                    b.HasOne("UserService.Models.User", "User")
+                    b.HasOne("Transaction_Service.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -144,9 +146,9 @@ namespace UserService.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UserService.Models.Notification", b =>
+            modelBuilder.Entity("Transaction_Service.Models.Notification", b =>
                 {
-                    b.HasOne("UserService.Models.User", "User")
+                    b.HasOne("Transaction_Service.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -155,13 +157,13 @@ namespace UserService.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("UserService.Models.Transaction", b =>
+            modelBuilder.Entity("Transaction_Service.Models.Transaction", b =>
                 {
-                    b.HasOne("UserService.Models.User", "Receiver")
+                    b.HasOne("Transaction_Service.Models.User", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverID");
 
-                    b.HasOne("UserService.Models.User", "Sender")
+                    b.HasOne("Transaction_Service.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderID");
 

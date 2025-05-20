@@ -3,17 +3,19 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using UserService.Database;
+using Transaction_Service.Database;
 
 #nullable disable
 
-namespace UserService.Migrations
+namespace Transaction_Service.Migrations
 {
     [DbContext(typeof(InstaDbContext))]
-    partial class InstaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520135959_CreatedDB")]
+    partial class CreatedDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,12 +48,6 @@ namespace UserService.Migrations
 
             modelBuilder.Entity("UserService.Models.Notification", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -62,8 +58,6 @@ namespace UserService.Migrations
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
-
-                    b.HasKey("ID");
 
                     b.HasIndex("UserID");
 

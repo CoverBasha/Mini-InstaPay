@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Transaction_Service.Models
 {
-    [Keyless]
     public class Notification
     {
+        [Key]
+        public int ID { get; set; }
+
         [Required]
         public int UserID { get; set; }
 

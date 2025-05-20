@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using UserService.Models;
+using Notification_Service.Models;
 
-namespace UserService.Database
+namespace Notification_Service.Database
 {
     public class InstaDbContext : DbContext
     {

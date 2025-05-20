@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace UserService.Migrations
+namespace Transaction_Service.Migrations
 {
-    public partial class CreatedTables : Migration
+    public partial class CreatedDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
