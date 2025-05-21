@@ -7,9 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import TransactionList from '@/components/TransactionList';
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
+  userID: string;
+  userName: string;
+  password: string;
+  phoneNum: string;
   balance: number;
 }
 
@@ -25,6 +26,8 @@ const Dashboard = () => {
       navigate('/login');
       return;
     }
+
+    console.log(storedUser)
 
     // Get user data
     setUser(JSON.parse(storedUser));
@@ -42,7 +45,7 @@ const Dashboard = () => {
           <CardHeader className="pb-2">
             <CardDescription>Current balance</CardDescription>
             <CardTitle className="text-3xl font-bold">
-              ${user?.balance.toFixed(2)}
+              ${user?.balance}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -50,8 +53,8 @@ const Dashboard = () => {
               <Button onClick={() => navigate('/send')} className="flex-1">
                 <ArrowUp className="mr-2 h-4 w-4" /> Send
               </Button>
-              <Button onClick={() => navigate('/request')} className="flex-1" variant="outline">
-                <ArrowDown className="mr-2 h-4 w-4" /> Request
+              <Button onClick={() => navigate('/deposit')} className="flex-1" variant="outline">
+                <ArrowDown className="mr-2 h-4 w-4" /> Deposit
               </Button>
             </div>
           </CardContent>
@@ -62,22 +65,22 @@ const Dashboard = () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="flex flex-col h-20 items-center justify-center" onClick={() => navigate('/add-money')}>
+            {/*<Button variant="outline" className="flex flex-col h-20 items-center justify-center" onClick={() => navigate('/add-money')}>
               <DollarSign className="h-6 w-6 mb-1" />
               <span>Add Money</span>
             </Button>
             <Button variant="outline" className="flex flex-col h-20 items-center justify-center" onClick={() => navigate('/withdraw')}>
               <CreditCard className="h-6 w-6 mb-1" />
               <span>Withdraw</span>
-            </Button>
+            </Button>*/ }
             <Button variant="outline" className="flex flex-col h-20 items-center justify-center" onClick={() => navigate('/transactions')}>
               <Clock className="h-6 w-6 mb-1" />
               <span>History</span>
             </Button>
-            <Button variant="outline" className="flex flex-col h-20 items-center justify-center" onClick={() => navigate('/profile')}>
+            {/*<Button variant="outline" className="flex flex-col h-20 items-center justify-center">
               <DollarSign className="h-6 w-6 mb-1" />
               <span>Profile</span>
-            </Button>
+            </Button>*/}
           </CardContent>
         </Card>
       </div>

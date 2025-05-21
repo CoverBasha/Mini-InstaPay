@@ -11,7 +11,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Send from "./pages/Send";
-import Request from "./pages/Request";
+import Deposit from "./pages/Deposit";
 import Transactions from "./pages/Transactions";
 import AddMoney from "./pages/AddMoney";
 import Withdraw from "./pages/Withdraw";
@@ -35,7 +35,7 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/send" element={<Send />} />
-            <Route path="/request" element={<Request />} />
+            <Route path="/deposit" element={<Deposit />} />
             <Route path="/transactions" element={<Transactions />} />
             <Route path="/add-money" element={<AddMoney />} />
             <Route path="/withdraw" element={<Withdraw />} />

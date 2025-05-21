@@ -9,9 +9,11 @@ namespace Transaction_Service.Models
         Debit
     }
 
-    [Keyless]
     public class BalanceLog
     {
+        [Key]
+        public int ID { get; set; }
+
         [Required]
         public int UserID { get; set; }
 

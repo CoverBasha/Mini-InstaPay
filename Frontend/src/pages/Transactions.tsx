@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +8,7 @@ import TransactionList from '@/components/TransactionList';
 
 const Transactions = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'all' | 'sent' | 'received'>('all');
 
   return (
     <div>
@@ -26,24 +26,24 @@ const Transactions = () => {
           <CardDescription>View and filter your past transactions</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all" className="w-full">
+          <Tabs 
+            defaultValue="all" 
+            className="w-full"
+            onValueChange={(value) => setActiveTab(value as 'all' | 'sent' | 'received')}
+          >
             <TabsList className="grid grid-cols-3 mb-6">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="sent">Sent</TabsTrigger>
               <TabsTrigger value="received">Received</TabsTrigger>
             </TabsList>
             <TabsContent value="all">
-              <TransactionList />
+              <TransactionList filter="all" />
             </TabsContent>
             <TabsContent value="sent">
-              <div className="py-8 text-center text-muted-foreground">
-                Filter functionality will be implemented in future updates.
-              </div>
+              <TransactionList filter="sent" />
             </TabsContent>
             <TabsContent value="received">
-              <div className="py-8 text-center text-muted-foreground">
-                Filter functionality will be implemented in future updates.
-              </div>
+              <TransactionList filter="received" />
             </TabsContent>
           </Tabs>
         </CardContent>

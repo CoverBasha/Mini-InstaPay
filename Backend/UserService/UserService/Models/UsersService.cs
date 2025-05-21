@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 using UserService.Database;
 
 namespace UserService.Models
@@ -22,7 +23,7 @@ namespace UserService.Models
                     Message = "You are already logged in!"
                 };
 
-            var found = context.Users.SingleOrDefault(u=>u.UserName == request.Username);
+            var found = context.Users.SingleOrDefault(u => u.UserName == request.Username);
 
             if (found != null)
                 return new AuthenticationResult
@@ -83,11 +84,12 @@ namespace UserService.Models
             return new AuthenticationResult
             {
                 Succes = true,
-                Message = "Logged in successfully"
+                Message = "Logged in successfully",
+                User = found
             };
         }
 
-        public async Task<AuthenticationResult> ChargeBalance(int amount, int userId)
+        public async Task<AuthenticationResult> ChargeBalance(float amount, int userId)
         {
             var user = context.Users.SingleOrDefault(u => u.UserID == userId);
 
@@ -99,6 +101,18 @@ namespace UserService.Models
                 };
 
             user.Balance += amount;
+
+            var log = new BalanceLog
+            {
+                User = user,
+                UpdateType = UpdateType.Credit,
+                BalanceBefore = user.Balance - amount,
+                BalanceAfter = user.Balance,
+                Time = DateTime.Now
+            };
+
+            context.BalanceLogs.Add(log);
+
             context.SaveChanges();
 
             return new AuthenticationResult

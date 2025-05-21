@@ -16,10 +16,9 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:8080") // React dev server
             .AllowAnyHeader()
             .AllowAnyMethod()
+            .AllowCredentials()
     );
 });
-
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -38,7 +37,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowReactApp");
-
 
 app.UseHttpsRedirection();
 

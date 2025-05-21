@@ -31,20 +31,11 @@ const Login = () => {
       });
 
       const data = await response;
-      console.log(data);
-
+      const user = await data.json();
+      
       if (!data.ok) {
         throw new Error('Login failed');
       }
-      
-
-      // Store user data
-      const user = {
-        id: data.id || '123',
-        name: username,
-        username: username,
-        balance: data.balance || 0
-      };
       
       localStorage.setItem('instaPay_user', JSON.stringify(user));
       

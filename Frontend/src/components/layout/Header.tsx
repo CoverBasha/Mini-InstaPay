@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Send, LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import NotificationPanel from '@/components/notifications/NotificationPanel';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -31,7 +31,8 @@ const Header = () => {
         </Link>
         
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/profile')}>
+          <NotificationPanel />
+          <Button variant="ghost" size="icon">
             <User size={20} />
           </Button>
           <Button variant="ghost" size="icon" onClick={handleLogout}>

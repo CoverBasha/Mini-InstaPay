@@ -24,6 +24,12 @@ namespace Notification_Service.Migrations
 
             modelBuilder.Entity("Notification_Service.Models.BalanceLog", b =>
                 {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
+
                     b.Property<double>("BalanceAfter")
                         .HasColumnType("float");
 
@@ -38,6 +44,8 @@ namespace Notification_Service.Migrations
 
                     b.Property<int>("UserID")
                         .HasColumnType("int");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("UserID");
 

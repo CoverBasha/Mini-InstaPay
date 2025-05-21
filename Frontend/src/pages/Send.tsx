@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,12 +6,21 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, Send as SendIcon } from 'lucide-react';
+import axios from 'axios';
+import { REFRESH_NOTIFICATIONS_EVENT } from '@/components/notifications/NotificationPanel';
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
+  userID: number;
+  userName: string;
+  password: string;
+  phoneNum: string;
   balance: number;
+}
+
+interface TransactionRequest {
+  senderId: number;
+  receiverUserName: string;
+  amount: number;
 }
 
 const mockContacts = [
@@ -41,7 +49,7 @@ const Send = () => {
     setUser(JSON.parse(storedUser));
   }, [navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) return;
@@ -68,25 +76,51 @@ const Send = () => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      
-      // Update user balance
-      const updatedUser = {
-        ...user,
-        balance: user.balance - amountValue
+    try {
+      const transactionRequest: TransactionRequest = {
+        senderId: user.userID,
+        receiverUserName: recipient,
+        amount: amountValue
       };
-      
-      localStorage.setItem('instaPay_user', JSON.stringify(updatedUser));
-      
+
+      const response = await axios.post(
+        'https://localhost:7204/api/transactions/makeTransaction',
+        transactionRequest,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data) {
+        // Update user balance in localStorage
+        const updatedUser = {
+          ...user,
+          balance: user.balance - amountValue
+        };
+        localStorage.setItem('instaPay_user', JSON.stringify(updatedUser));
+        
+        // Trigger notification refresh
+        window.dispatchEvent(new Event(REFRESH_NOTIFICATIONS_EVENT));
+        
+        toast({
+          title: "Money sent successfully!",
+          description: `$${amountValue.toFixed(2)} has been sent to ${recipient}.`,
+        });
+        
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
       toast({
-        title: "Money sent successfully!",
-        description: `$${amountValue.toFixed(2)} has been sent to ${recipient}.`,
+        title: "Transaction failed",
+        description: error.response?.data || "Failed to send money. Please try again.",
+        variant: "destructive"
       });
-      
-      navigate('/dashboard');
-    }, 1500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

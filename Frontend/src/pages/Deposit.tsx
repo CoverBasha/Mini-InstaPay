@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -7,17 +6,36 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, ArrowDownLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import axios from 'axios';
 
-const Request = () => {
-  const [from, setFrom] = useState('');
+interface User {
+  userID: number;
+  userName: string;
+  password: string;
+  phoneNum: string;
+  balance: number;
+}
+
+const Deposit = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [amount, setAmount] = useState('');
-  const [note, setNote] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const storedUser = localStorage.getItem('instaPay_user');
+    if (!storedUser) {
+      navigate('/login');
+      return;
+    }
+    setUser(JSON.parse(storedUser));
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) return;
     
     const amountValue = parseFloat(amount);
     
@@ -32,17 +50,42 @@ const Request = () => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      
+    try {
+      const response = await axios.post(
+        `https://localhost:8000/api/users/charge?amount=${amountValue}&userId=${user.userID}`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data) {
+        // Update user balance in localStorage
+        const updatedUser = {
+          ...user,
+          balance: user.balance + amountValue
+        };
+        localStorage.setItem('instaPay_user', JSON.stringify(updatedUser));
+        
+        toast({
+          title: "Deposit successful!",
+          description: `$${amountValue.toFixed(2)} has been added to your balance.`,
+        });
+        
+        navigate('/dashboard');
+      }
+    } catch (error: any) {
       toast({
-        title: "Money request sent!",
-        description: `Request for $${amountValue.toFixed(2)} has been sent to ${from}.`,
+        title: "Deposit failed",
+        description: error.response?.data || "Failed to deposit money. Please try again.",
+        variant: "destructive"
       });
-      
-      navigate('/dashboard');
-    }, 1500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,23 +100,11 @@ const Request = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>Request Money</CardTitle>
-          <CardDescription>Request funds from another user</CardDescription>
+          <CardTitle>Charge Balance</CardTitle>
+          <CardDescription>Charge money into your account balance</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="from">From (Email or Username)</Label>
-              <Input
-                id="from"
-                type="text"
-                placeholder="name@example.com"
-                value={from}
-                onChange={(e) => setFrom(e.target.value)}
-                required
-              />
-            </div>
-            
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <div className="money-input-wrapper">
@@ -89,16 +120,11 @@ const Request = () => {
                   required
                 />
               </div>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="note">Note (Optional)</Label>
-              <Input
-                id="note"
-                placeholder="What's it for?"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
+              {user && (
+                <p className="text-sm text-muted-foreground">
+                  Current balance: ${user.balance.toFixed(2)}
+                </p>
+              )}
             </div>
           </CardContent>
           <CardFooter>
@@ -107,7 +133,7 @@ const Request = () => {
                 "Processing..."
               ) : (
                 <>
-                  <ArrowDownLeft className="mr-2 h-4 w-4" /> Request Money
+                  <ArrowDownLeft className="mr-2 h-4 w-4" /> Deposit
                 </>
               )}
             </Button>
@@ -118,4 +144,4 @@ const Request = () => {
   );
 };
 
-export default Request;
+export default Deposit;

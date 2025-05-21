@@ -29,11 +29,11 @@ namespace UserService.Controllers
         {
             var result = await _userService.LoginAsync(loginRequest, HttpContext.Session);
 
-            return !result.Succes ? BadRequest(result.Message) : Ok(result.Message);
+            return !result.Succes ? BadRequest(result.Message) : Ok(result.User);
         }
 
         [HttpPost("charge")]
-        public async Task<IActionResult> ChargeBalance(int amount, int userId)
+        public async Task<IActionResult> ChargeBalance(float amount, int userId)
         {
             var result = await _userService.ChargeBalance(amount, userId);
 

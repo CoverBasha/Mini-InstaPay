@@ -3,8 +3,8 @@
     public class TransactionRequest
     {
         public int SenderId { get; set; }
-        public int RecieverId { get; set; }
-        public int Amount { get; set; }
+        public string ReceiverUserName { get; set; }
+        public float Amount { get; set; }
 
     }
 }

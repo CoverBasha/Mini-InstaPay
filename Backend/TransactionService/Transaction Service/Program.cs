@@ -11,15 +11,15 @@ builder.Services.AddDbContext<InstaDbContext>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        policy => policy
-            .WithOrigins("http://localhost:8080") // React dev server
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:8080")
             .AllowAnyHeader()
             .AllowAnyMethod()
-    );
+            .AllowCredentials();
+    });
 });
-
-
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -37,8 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowReactApp");
-
+// Use CORS before other middleware
+app.UseCors();
 
 app.UseHttpsRedirection();
 

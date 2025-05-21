@@ -1,93 +1,83 @@
-
 import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import axios from 'axios';
 
 interface Transaction {
-  id: string;
-  type: 'send' | 'receive';
+  tid: number;
+  senderID: number;
+  receiverID: number;
   amount: number;
-  recipient: string;
-  date: string;
-  status: 'completed' | 'pending' | 'failed';
+  status: 'Pending' | 'Sent' | 'Failed';
+  time: string;
+  sender?: {
+    userName: string;
+  };
+  receiver?: {
+    userName: string;
+  };
 }
 
 interface TransactionListProps {
   limit?: number;
+  filter?: 'all' | 'sent' | 'received';
 }
 
-const TransactionList = ({ limit }: TransactionListProps) => {
+const TransactionList = ({ limit, filter = 'all' }: TransactionListProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Mock data - in a real app, this would be fetched from an API
-    const mockTransactions: Transaction[] = [
-      {
-        id: '1',
-        type: 'send',
-        amount: 50.00,
-        recipient: 'Jane Smith',
-        date: '2025-04-27T14:30:00Z',
-        status: 'completed'
-      },
-      {
-        id: '2',
-        type: 'receive',
-        amount: 120.50,
-        recipient: 'Mike Johnson',
-        date: '2025-04-26T09:15:00Z',
-        status: 'completed'
-      },
-      {
-        id: '3',
-        type: 'send',
-        amount: 25.75,
-        recipient: 'Sarah Wilson',
-        date: '2025-04-24T16:45:00Z',
-        status: 'completed'
-      },
-      {
-        id: '4',
-        type: 'receive',
-        amount: 75.00,
-        recipient: 'Robert Davis',
-        date: '2025-04-22T11:20:00Z',
-        status: 'completed'
-      },
-      {
-        id: '5',
-        type: 'send',
-        amount: 30.00,
-        recipient: 'Emily Brown',
-        date: '2025-04-20T08:30:00Z',
-        status: 'completed'
-      },
-      {
-        id: '6',
-        type: 'receive',
-        amount: 200.00,
-        recipient: 'David Miller',
-        date: '2025-04-18T14:00:00Z',
-        status: 'completed'
-      },
-      {
-        id: '7',
-        type: 'send',
-        amount: 15.25,
-        recipient: 'Lisa Moore',
-        date: '2025-04-16T09:45:00Z',
-        status: 'completed'
-      }
-    ];
+    const fetchTransactions = async () => {
+      try {
+        const storedUser = localStorage.getItem('instaPay_user');
+        if (!storedUser) {
+          setError('User not found');
+          setLoading(false);
+          return;
+        }
 
-    // Simulate API call
-    setTimeout(() => {
-      setTransactions(mockTransactions);
-      setLoading(false);
-    }, 500);
+        const user = JSON.parse(storedUser);
+        const response = await axios.get(`https://localhost:7204/api/transactions/getTransactions?userId=${user.userID}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          withCredentials: true,
+          validateStatus: function (status) {
+            return status >= 200 && status < 500;
+          }
+        });
+        
+        if (response.data) {
+          setTransactions(response.data);
+        }
+      } catch (err) {
+        setError('Failed to fetch transactions');
+        console.error('Error fetching transactions:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
-  const limitedTransactions = limit ? transactions.slice(0, limit) : transactions;
+  const filteredTransactions = transactions.filter(transaction => {
+    const storedUser = localStorage.getItem('instaPay_user');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+    const isSender = currentUser && transaction.senderID === currentUser.userID;
+
+    switch (filter) {
+      case 'sent':
+        return isSender;
+      case 'received':
+        return !isSender;
+      default:
+        return true;
+    }
+  });
+
+  const limitedTransactions = limit ? filteredTransactions.slice(0, limit) : filteredTransactions;
 
   if (loading) {
     return (
@@ -97,44 +87,59 @@ const TransactionList = ({ limit }: TransactionListProps) => {
     );
   }
 
-  if (transactions.length === 0) {
+  if (error) {
+    return (
+      <div className="py-8 text-center text-red-500">
+        {error}
+      </div>
+    );
+  }
+
+  if (filteredTransactions.length === 0) {
     return (
       <div className="py-8 text-center text-muted-foreground">
-        No transactions to display.
+        No {filter !== 'all' ? filter : ''} transactions to display.
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {limitedTransactions.map((transaction) => (
-        <div key={transaction.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-          <div className="flex items-center">
-            <div className={`p-2 rounded-full mr-3 ${transaction.type === 'send' ? 'bg-red-100' : 'bg-success bg-opacity-20'}`}>
-              {transaction.type === 'send' ? (
-                <ArrowUpRight className={`h-5 w-5 text-red-500`} />
-              ) : (
-                <ArrowDownLeft className={`h-5 w-5 text-success`} />
-              )}
+      {limitedTransactions.map((transaction) => {
+        const storedUser = localStorage.getItem('instaPay_user');
+        const currentUser = storedUser ? JSON.parse(storedUser) : null;
+        const isSender = currentUser && transaction.senderID === currentUser.userID;
+        const otherParty = isSender ? transaction.receiver?.userName : transaction.sender?.userName;
+
+        return (
+          <div key={transaction.tid} className="flex items-center justify-between border-b pb-4 last:border-0">
+            <div className="flex items-center">
+              <div className={`p-2 rounded-full mr-3 ${isSender ? 'bg-red-100' : 'bg-success bg-opacity-20'}`}>
+                {isSender ? (
+                  <ArrowUpRight className={`h-5 w-5 text-red-500`} />
+                ) : (
+                  <ArrowDownLeft className={`h-5 w-5 text-success`} />
+                )}
+              </div>
+              <div>
+                <p className="font-medium">
+                  {isSender ? `Sent to ${otherParty}` : `Received from ${otherParty}`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(transaction.time).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-medium">
-                {transaction.type === 'send' ? `Sent to ${transaction.recipient}` : `Received from ${transaction.recipient}`}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {new Date(transaction.date).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </p>
+            <div className={`font-semibold ${isSender ? 'text-red-600' : 'text-success'}`}>
+              {isSender ? '-' : '+'}${transaction.amount.toFixed(2)}
             </div>
           </div>
-          <div className={`font-semibold ${transaction.type === 'send' ? 'text-red-600' : 'text-success'}`}>
-            {transaction.type === 'send' ? '-' : '+'}${transaction.amount.toFixed(2)}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

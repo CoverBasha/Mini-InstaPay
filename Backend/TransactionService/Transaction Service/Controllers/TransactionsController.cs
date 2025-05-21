@@ -16,7 +16,7 @@ namespace Transaction_Service.Controllers
         }
 
         [HttpGet("getTransactions")]
-        public async Task<IActionResult> GetTransactions(int userId)
+        public IActionResult GetTransactions(int userId)
         {
             var result = transactionService.GetTransactions(userId);
             if (!result.Success)
@@ -28,7 +28,7 @@ namespace Transaction_Service.Controllers
         [HttpPost("makeTransaction")]
         public async Task<IActionResult> MakeTransaction(TransactionRequest request)
         {
-            var result = transactionService.MakeTransaction(request);
+            var result = await transactionService.MakeTransaction(request);
 
             if(!result.Success)
                 return BadRequest(result.Message);
