@@ -11,8 +11,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/out ./
 
-EXPOSE 5204
+EXPOSE 5205
 
-ENV ASPNETCORE_URLS=http://+:5204
+ENV ASPNETCORE_URLS=http://+:5205
 
 ENTRYPOINT ["dotnet", "Transaction Service.dll"]
