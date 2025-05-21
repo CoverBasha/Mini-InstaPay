@@ -1,18 +1,13 @@
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
+EXPOSE 80
 
-COPY *.csproj ./
-RUN dotnet restore
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
 
-COPY . ./
-RUN dotnet publish -c Release -o out
-
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/out ./
-
-EXPOSE 5205
-
-ENV ASPNETCORE_URLS=http://+:5205
-
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Transaction Service.dll"]

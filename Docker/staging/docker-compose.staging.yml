@@ -1,0 +1,67 @@
+version: '3.9'
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "${MSSQL_PASSWORD}"
+    ports:
+      - "1434:1433"   # different port to avoid conflict
+    volumes:
+      - mssql_data_staging:/var/opt/mssql
+
+  frontend:
+    image: frontend:staging
+    build:
+      context: ../../Frontend
+    ports:
+      - "3100:3000"
+    depends_on:
+      - user-service
+      - notification-service
+      - transaction-service
+
+  user-service:
+    image: user-service:staging
+    build:
+      context: ../../Backend/UserService/UserService
+    ports:
+      - "5101:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=AppDb;User=sa;Password=${MSSQL_PASSWORD}
+    depends_on:
+      - mssql
+
+  notification-service:
+    image: notification-service:staging
+    build:
+      context: ../../Backend/NotificationService/NotificationService
+    ports:
+      - "5102:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=AppDb;User=sa;Password=${MSSQL_PASSWORD}
+    depends_on:
+      - mssql
+
+  transaction-service:
+    image: transaction-service:staging
+    build:
+      context: ../../Backend/TransactionService/Transaction Service
+    ports:
+      - "5103:80"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=AppDb;User=sa;Password=${MSSQL_PASSWORD}
+    depends_on:
+      - mssql
+
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ../nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+
+volumes:
+  mssql_data_staging:
